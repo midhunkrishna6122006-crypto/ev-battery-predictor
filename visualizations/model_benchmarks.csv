@@ -1,0 +1,6 @@
+Model Architecture,MAE (km),RMSE (km),R² Score
+Random Forest,17.642,24.201,0.8752
+Gradient Boost,11.875,17.026,0.9383
+Xgboost,9.685,13.887,0.9589
+Linear,22.144,29.774,0.8112
+Ensemble (Weighted Blending),12.962,18.488,0.9272

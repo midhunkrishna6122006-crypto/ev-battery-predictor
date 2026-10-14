@@ -1,0 +1,85 @@
+# ==============================================================================
+# EV Battery Digital Twin & Range Predictor - Model Configuration
+# Course: 19MAM56 Advanced Machine Learning Lab (CAT II Project Work)
+# Coimbatore Institute of Technology - Department of Computing (AI & ML)
+# ==============================================================================
+
+project:
+  name: "ev-battery-predictor"
+  version: "2.0.0"
+  description: "Physics-Informed Digital Twin and Advanced Ensemble Learning for EV Range Optimization"
+  author: "III M.Sc. AI & ML (2024 Batch)"
+  course: "19MAM56 - Advanced Machine Learning Lab"
+
+dataset:
+  telemetry_archive: "Part1(1).csv.zip"
+  synthetic_sample_size: 5000
+  test_split_ratio: 0.20
+  random_seed: 42
+  outlier_iqr_threshold: 1.5
+
+dimensionality_reduction:
+  method: "PCA"
+  n_components: 2
+  variance_target: 0.65
+
+digital_twin:
+  nominal_capacity_kwh: 75.0
+  cell_chemistry: "Li-ion (NMC)"
+  calendar_fade_rate: 0.00008
+  cycle_fade_rate: 0.00015
+  thermal_acceleration_factor: 0.04
+  dod_stress_factor: 0.25
+  soh_retirement_threshold: 0.80
+
+models:
+  random_forest:
+    n_estimators: 100
+    max_depth: 15
+    min_samples_split: 5
+    min_samples_leaf: 2
+    random_state: 42
+  
+  gradient_boosting:
+    n_estimators: 100
+    learning_rate: 0.10
+    max_depth: 8
+    random_state: 42
+
+  xgboost_optuna_tuned:
+    n_estimators: 120
+    learning_rate: 0.08
+    max_depth: 6
+    subsample: 0.85
+    random_state: 42
+
+  linear_baseline:
+    fit_intercept: true
+
+ensemble:
+  type: "weighted_blending"
+  weights:
+    random_forest: 0.35
+    gradient_boosting: 0.35
+    xgboost: 0.20
+    linear: 0.10
+
+optuna_tuning:
+  n_trials: 15
+  metric: "MAE"
+  parameter_space:
+    n_estimators: [50, 150]
+    max_depth: [3, 8]
+    learning_rate: [0.02, 0.20]
+    subsample: [0.6, 1.0]
+
+deployment:
+  api:
+    framework: "FastAPI"
+    host: "0.0.0.0"
+    port: 8000
+    docs_url: "/docs"
+  ui:
+    framework: "Streamlit"
+    host: "0.0.0.0"
+    port: 7860

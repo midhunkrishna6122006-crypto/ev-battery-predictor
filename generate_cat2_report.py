@@ -36,24 +36,20 @@ class SimpleHardCopyCanvas(canvas.Canvas):
 
     def draw_page_decorations(self, page_count):
         self.saveState()
-        self.setFont("Helvetica", 8)
-        self.setFillColor(colors.HexColor("#444444"))
         
-        # Running Header (pages > 1)
-        if self._pageNumber > 1:
-            self.drawString(50, 800, "19MAM56 AML Lab CAT II - VoltWise: EV Battery Digital Twin & Range Optimization")
-            self.drawRightString(A4[0] - 50, 800, "CIT Department of Computing")
-            self.setStrokeColor(colors.HexColor("#AAAAAA"))
-            self.setLineWidth(0.5)
-            self.line(50, 794, A4[0] - 50, 794)
-            
-        # Running Footer (all pages)
-        self.setStrokeColor(colors.HexColor("#AAAAAA"))
-        self.setLineWidth(0.5)
-        self.line(50, 42, A4[0] - 50, 42)
-        self.drawString(50, 30, "Coimbatore Institute of Technology - M.Sc. Artificial Intelligence & Machine Learning")
-        page_text = f"Page {self._pageNumber} of {page_count}"
-        self.drawRightString(A4[0] - 50, 30, page_text)
+        # 1. Page Border (Clean 1.0 pt solid black border around the page)
+        border_inset = 30  # pt from page boundary
+        self.setStrokeColor(colors.black)
+        self.setLineWidth(1.0)
+        self.rect(border_inset, border_inset, A4[0] - 2 * border_inset, A4[1] - 2 * border_inset)
+        
+        # 2. Centered Page Number (80, 81, 82, 83 in the middle at bottom)
+        page_num = 79 + self._pageNumber
+        self.setFont("Helvetica", 10)
+        self.setFillColor(colors.black)
+        self.drawCentredString(A4[0] / 2.0, 42, str(page_num))
+        
+        # Note: No running header at top, no institute string at bottom
         self.restoreState()
 
 
@@ -66,8 +62,8 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
         pagesize=A4,
         leftMargin=50,
         rightMargin=50,
-        topMargin=46,
-        bottomMargin=46
+        topMargin=44,
+        bottomMargin=56
     )
     
     content_width = A4[0] - 100  # 495.27 pt
@@ -324,7 +320,7 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
             Paragraph("<b>Output</b><br/>Range (km), SOH %, RUL", cell_style)
         ]
     ]
-    t_pipe = Table(pipe_data, colWidths=[84, 16, 96, 16, 114, 16, 80, 16, 73])
+    t_pipe = Table(pipe_data, colWidths=[80, 15, 92, 15, 110, 15, 80, 15, 73])
     t_pipe.setStyle(TableStyle([
         ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F9F9F9')),
         ('BOX', (0, 0), (-1, -1), 0.8, colors.HexColor('#444444')),

@@ -1,8 +1,11 @@
 # Physics-Informed Digital Twin and Advanced Ensemble Learning for Electric Vehicle Battery Prognostics and Driving Range Optimization
 
+**Author:** Midhun Krishna B  
 **Course:** 19MAM56 – Advanced Machine Learning Lab (CAT II Project Work)  
 **Program:** III M.Sc. AI & ML (V Semester), Department of Computing – AI & ML  
 **Institution:** Coimbatore Institute of Technology, Coimbatore – 641 014  
+**GitHub Repository:** [https://github.com/midhunkrishna6122006-crypto/ev-battery-predictor](https://github.com/midhunkrishna6122006-crypto/ev-battery-predictor)  
+**Live Cloud Deployment:** [https://ev-battery-predictor.streamlit.app/](https://ev-battery-predictor.streamlit.app/)  
 
 ---
 
@@ -109,7 +112,8 @@ Models were evaluated on a 20% hold-out test dataset across 5,000 driving instan
 
 ## 6. Deployment & Containerization
 1. **Local REST API**: Implemented via FastAPI (`api.py`) exposing typed schemas for `/predict/range`, `/battery/health`, and `/battery/optimize-charging` with automatic OpenAPI documentation (`/docs`).
-2. **Docker Containerization**: Encapsulated within a multi-platform `Dockerfile` exposing standard ports (7860/8000), ready for zero-configuration hosting on Hugging Face Spaces or AWS EC2.
+2. **Docker Containerization**: Encapsulated within a multi-platform `Dockerfile` exposing standard ports (7860/8000), ready for zero-configuration hosting on cloud instances.
+3. **Public Cloud Deployment**: The full-stack application is deployed live on Streamlit Community Cloud at [https://ev-battery-predictor.streamlit.app/](https://ev-battery-predictor.streamlit.app/) with automated continuous deployment linked to GitHub.
 
 ---
 

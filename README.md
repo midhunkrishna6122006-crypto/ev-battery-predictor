@@ -3,6 +3,15 @@
 **Department of Computing – AI & ML**  
 **Coimbatore Institute of Technology, Coimbatore – 641 014**
 
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://ev-battery-predictor.streamlit.app/)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/midhunkrishna6122006-crypto/ev-battery-predictor)
+[![FastAPI](https://img.shields.io/badge/FastAPI-REST%20API-009688?logo=fastapi&logoColor=white)](http://localhost:8000/docs)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white)](Dockerfile)
+
+* **🌐 Live Cloud Application:** [https://ev-battery-predictor.streamlit.app/](https://ev-battery-predictor.streamlit.app/)
+* **💻 GitHub Source Code:** [https://github.com/midhunkrishna6122006-crypto/ev-battery-predictor](https://github.com/midhunkrishna6122006-crypto/ev-battery-predictor)
+* **📄 Academic Project Report:** [`IEEE_PROJECT_REPORT.pdf`](IEEE_PROJECT_REPORT.pdf)
+
 ---
 
 ## 📌 1. Project Overview & Research Objectives

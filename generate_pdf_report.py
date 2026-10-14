@@ -161,7 +161,7 @@ def build_pdf(output_pdf_path, project_dir):
 
     # Title & Metadata
     story.append(Paragraph("Physics-Informed Digital Twin and Advanced Ensemble Learning for Electric Vehicle Battery Prognostics and Driving Range Optimization", title_style))
-    story.append(Paragraph("<b>Course:</b> 19MAM56 – Advanced Machine Learning Lab (CAT II Project Work)<br/><b>Program:</b> III M.Sc. AI & ML (V Semester), Department of Computing – AI & ML<br/><b>Institution:</b> Coimbatore Institute of Technology, Coimbatore – 641 014", meta_style))
+    story.append(Paragraph("<b>Author:</b> Midhun Krishna B &nbsp;|&nbsp; <b>Course:</b> 19MAM56 – Advanced Machine Learning Lab<br/><b>Program:</b> III M.Sc. AI & ML (V Semester), Department of Computing – AI & ML<br/><b>Institution:</b> Coimbatore Institute of Technology, Coimbatore – 641 014<br/><b>GitHub:</b> <font color='#0D47A1'><u>https://github.com/midhunkrishna6122006-crypto/ev-battery-predictor</u></font><br/><b>Live Cloud App:</b> <font color='#0D47A1'><u>https://ev-battery-predictor.streamlit.app/</u></font>", meta_style))
     story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#0D47A1'), spaceBefore=2, spaceAfter=10))
 
     # Abstract Box
@@ -318,7 +318,8 @@ def build_pdf(output_pdf_path, project_dir):
     story.append(Paragraph("6. Deployment & Containerization", h1_style))
     story.append(Paragraph(
         "<b>6.1 Production REST API:</b> Implemented in <code>api.py</code> with FastAPI and Pydantic v2 schemas. Exposes typed endpoints for <code>/predict/range</code>, <code>/battery/health</code>, and <code>/battery/optimize-charging</code> with automatic OpenAPI/Swagger documentation at <code>/docs</code>.<br/>"
-        "<b>6.2 Containerization & Cloud Deployment:</b> Packaged into a standardized <code>Dockerfile</code> exposing port 7860/8000, suitable for continuous deployment to Hugging Face Spaces or AWS EC2 instances.",
+        "<b>6.2 Containerization & Docker:</b> Packaged into a standardized <code>Dockerfile</code> exposing ports 7860/8000, ensuring multi-platform reproducibility.<br/>"
+        "<b>6.3 Public Cloud Deployment:</b> The full-stack interactive application is continuously deployed and publicly accessible on Streamlit Community Cloud at: <font color='#0D47A1'><u>https://ev-battery-predictor.streamlit.app/</u></font>.",
         body_style
     ))
 

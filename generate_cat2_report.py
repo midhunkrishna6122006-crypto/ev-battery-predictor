@@ -45,7 +45,7 @@ class SimpleHardCopyCanvas(canvas.Canvas):
         
         # 2. Centered Page Number (80, 81, 82, 83 in the middle at bottom)
         page_num = 79 + self._pageNumber
-        self.setFont("Helvetica", 10)
+        self.setFont("Times-Roman", 10)
         self.setFillColor(colors.black)
         self.drawCentredString(A4[0] / 2.0, 42, str(page_num))
         
@@ -69,80 +69,91 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
     content_width = A4[0] - 100  # 495.27 pt
     styles = getSampleStyleSheet()
     
-    # Clean typography matching TrustLens format
+    # Clean typography matching the exact reference document (Times New Roman)
     title_main = ParagraphStyle(
         'MainTitle',
         parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=20,
-        leading=24,
+        fontName='Times-Bold',
+        fontSize=22,
+        leading=26,
         alignment=1, # Center
         textColor=colors.black,
-        spaceAfter=3
+        spaceAfter=2
     )
 
     title_sub1 = ParagraphStyle(
         'SubTitle1',
         parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=12,
+        fontName='Times-Bold',
+        fontSize=13,
         leading=16,
         alignment=1,
-        textColor=colors.HexColor('#222222'),
-        spaceAfter=2
+        textColor=colors.black,
+        spaceAfter=1
     )
 
     title_sub2 = ParagraphStyle(
         'SubTitle2',
         parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=10,
-        leading=14,
+        fontName='Times-Bold',
+        fontSize=13,
+        leading=16,
         alignment=1,
-        textColor=colors.HexColor('#444444'),
-        spaceAfter=4
+        textColor=colors.black,
+        spaceAfter=3
     )
 
-    meta_style = ParagraphStyle(
-        'MetaStyle',
+    meta_course = ParagraphStyle(
+        'MetaCourse',
         parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=9,
-        leading=13,
+        fontName='Times-Italic',
+        fontSize=11,
+        leading=14,
         alignment=1,
-        textColor=colors.HexColor('#111111'),
-        spaceAfter=2
+        textColor=colors.black,
+        spaceAfter=1
+    )
+
+    meta_inst = ParagraphStyle(
+        'MetaInst',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=9.5,
+        leading=12.5,
+        alignment=1,
+        textColor=colors.black,
+        spaceAfter=3
     )
 
     h1_style = ParagraphStyle(
         'Heading1Custom',
         parent=styles['Heading1'],
-        fontName='Helvetica-Bold',
-        fontSize=11,
+        fontName='Times-Bold',
+        fontSize=12,
         leading=15,
         textColor=colors.black,
         spaceBefore=8,
-        spaceAfter=4,
+        spaceAfter=3,
         keepWithNext=True
     )
 
     body_style = ParagraphStyle(
         'BodyCustom',
         parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=8.8,
-        leading=12.6,
+        fontName='Times-Roman',
+        fontSize=10,
+        leading=13.2,
         alignment=4, # Justified
         textColor=colors.black,
-        spaceAfter=4
+        spaceAfter=3.5
     )
 
     abstract_style = ParagraphStyle(
         'AbstractBody',
         parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=8.8,
-        leading=12.5,
+        fontName='Times-Roman',
+        fontSize=10,
+        leading=13.2,
         alignment=4,
         textColor=colors.black
     )
@@ -150,9 +161,9 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
     cell_style = ParagraphStyle(
         'PipeCellStyle',
         parent=styles['Normal'],
-        fontName='Helvetica',
+        fontName='Times-Roman',
         fontSize=8,
-        leading=11,
+        leading=10.5,
         alignment=1, # Center
         textColor=colors.black
     )
@@ -160,34 +171,34 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
     caption_style = ParagraphStyle(
         'FigureCaption',
         parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=8.2,
+        fontName='Times-Roman',
+        fontSize=9,
         leading=11.5,
         alignment=1,
-        textColor=colors.HexColor('#222222'),
+        textColor=colors.black,
         spaceBefore=3,
-        spaceAfter=6
+        spaceAfter=5
     )
 
     table_title_style = ParagraphStyle(
         'TableTitle',
         parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=8.5,
+        fontName='Times-Roman',
+        fontSize=9,
         leading=11.5,
-        alignment=0,
+        alignment=1, # Center in reference docx
         textColor=colors.black,
-        spaceBefore=6,
-        spaceAfter=3,
+        spaceBefore=5,
+        spaceAfter=2.5,
         keepWithNext=True
     )
 
     eq_style = ParagraphStyle(
         'EquationStyle',
         parent=styles['Normal'],
-        fontName='Courier-BoldOblique',
-        fontSize=8.5,
-        leading=12,
+        fontName='Times-Italic',
+        fontSize=10,
+        leading=13,
         alignment=1,
         textColor=colors.black,
         spaceBefore=2,
@@ -197,9 +208,9 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
     ref_style = ParagraphStyle(
         'RefStyle',
         parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=7.5,
-        leading=10.2,
+        fontName='Times-Roman',
+        fontSize=9,
+        leading=11.5,
         alignment=4,
         firstLineIndent=-12,
         leftIndent=12,
@@ -214,9 +225,9 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
     story.append(Paragraph("VOLTWISE", title_main))
     story.append(Paragraph("Electric Vehicle Driving Range Optimization", title_sub1))
     story.append(Paragraph("Using Physics-Informed Battery Digital Twin and ML Ensembles", title_sub2))
-    story.append(Paragraph("Advanced Machine Learning Lab - CAT II Mini Project", meta_style))
-    story.append(Paragraph("M.Sc. AI & ML, Coimbatore Institute of Technology, Coimbatore", meta_style))
-    story.append(HRFlowable(width="100%", thickness=0.8, color=colors.black, spaceBefore=4, spaceAfter=7))
+    story.append(Paragraph("Advanced Machine Learning Lab - CAT II Mini Project", meta_course))
+    story.append(Paragraph("M.Sc. AI & ML, Coimbatore Institute of Technology, Coimbatore", meta_inst))
+    story.append(HRFlowable(width="100%", thickness=0.8, color=colors.black, spaceBefore=4, spaceAfter=6))
 
     # Abstract
     story.append(Paragraph("<b>Abstract</b>", h1_style))
@@ -231,7 +242,7 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
         "R<sup>2</sup> score of 0.9589. The system is packaged with a FastAPI backend and an interactive dashboard for practical testing."
     )
     story.append(Paragraph(abstract_text, abstract_style))
-    story.append(Spacer(1, 5))
+    story.append(Spacer(1, 4))
 
     # SECTION 1: PROBLEM DEFINITION AND OBJECTIVES
     story.append(Paragraph("1. Problem Definition and Objectives", h1_style))
@@ -277,12 +288,12 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
         ('LINEABOVE', (0, 0), (-1, 0), 1.0, colors.black),
         ('LINEBELOW', (0, 0), (-1, 0), 0.5, colors.black),
         ('LINEBELOW', (0, -1), (-1, -1), 1.0, colors.black),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-        ('TOPPADDING', (0, 0), (-1, -1), 3),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 7.5),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2.5),
+        ('TOPPADDING', (0, 0), (-1, -1), 2.5),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8.5),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F9FA')]),
     ]))
     story.append(t1)
@@ -326,10 +337,10 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
         ('BOX', (0, 0), (-1, -1), 0.8, colors.HexColor('#444444')),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-        ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
-        ('FONTNAME', (3, 0), (3, 0), 'Helvetica-Bold'),
-        ('FONTNAME', (5, 0), (5, 0), 'Helvetica-Bold'),
-        ('FONTNAME', (7, 0), (7, 0), 'Helvetica-Bold'),
+        ('FONTNAME', (1, 0), (1, 0), 'Times-Bold'),
+        ('FONTNAME', (3, 0), (3, 0), 'Times-Bold'),
+        ('FONTNAME', (5, 0), (5, 0), 'Times-Bold'),
+        ('FONTNAME', (7, 0), (7, 0), 'Times-Bold'),
         ('FONTSIZE', (1, 0), (1, 0), 10),
         ('FONTSIZE', (3, 0), (3, 0), 10),
         ('FONTSIZE', (5, 0), (5, 0), 10),
@@ -392,12 +403,12 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
         ('LINEABOVE', (0, 0), (-1, 0), 1.0, colors.black),
         ('LINEBELOW', (0, 0), (-1, 0), 0.5, colors.black),
         ('LINEBELOW', (0, -1), (-1, -1), 1.0, colors.black),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-        ('TOPPADDING', (0, 0), (-1, -1), 3),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 7.5),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2.5),
+        ('TOPPADDING', (0, 0), (-1, -1), 2.5),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8.5),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F9FA')]),
     ]))
     story.append(t2)
@@ -422,14 +433,14 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
         ('LINEABOVE', (0, 0), (-1, 0), 1.0, colors.black),
         ('LINEBELOW', (0, 0), (-1, 0), 0.5, colors.black),
         ('LINEBELOW', (0, -1), (-1, -1), 1.0, colors.black),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, 0), 8),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 3.5),
-        ('TOPPADDING', (0, 0), (-1, -1), 3.5),
+        ('FONTNAME', (0, 0), (-1, 0), 'Times-Bold'),
+        ('FONTSIZE', (0, 0), (-1, 0), 9),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 2.5),
+        ('TOPPADDING', (0, 0), (-1, -1), 2.5),
         ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
-        ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-        ('FONTSIZE', (0, 1), (-1, -1), 7.5),
-        ('FONTNAME', (0, 4), (-1, 4), 'Helvetica-Bold'),
+        ('FONTNAME', (0, 1), (-1, -1), 'Times-Roman'),
+        ('FONTSIZE', (0, 1), (-1, -1), 8.5),
+        ('FONTNAME', (0, 4), (-1, 4), 'Times-Bold'),
         ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F9FA')]),
     ]))
     story.append(t3)
@@ -491,7 +502,7 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
     # Figure 3: SHAP Feature Importance Chart
     fig5_path = os.path.join(vis_dir, 'fig5_shap_feature_importance.png')
     if os.path.exists(fig5_path):
-        img5_w = content_width * 0.52
+        img5_w = content_width * 0.42
         img5_h = img5_w * (1800 / 3000)
         story.append(Image(fig5_path, width=img5_w, height=img5_h))
         story.append(Paragraph("<b>Figure 3.</b> SHAP feature importance ranking: Usable capacity, SOC, speed, and ambient temperature dominance.", caption_style))
@@ -502,7 +513,7 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
         "predicted range by up to 28% due to elevated internal cell resistance and cabin heating loads, while moderate temperatures (20-25 deg C) maximize efficiency.",
         body_style
     ))
-    story.append(Spacer(1, 3))
+    story.append(Spacer(1, 2))
 
     # SECTION 6: DEPLOYMENT AND SYSTEM ARCHITECTURE
     story.append(Paragraph("6. Deployment and System Architecture", h1_style))
@@ -515,7 +526,7 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
         "and payload changes, observing instantaneous range predictions and battery health indicators.",
         body_style
     ))
-    story.append(Spacer(1, 3))
+    story.append(Spacer(1, 2))
 
     # SECTION 7: CONCLUSION AND FUTURE SCOPE
     story.append(Paragraph("7. Conclusion and Future Scope", h1_style))
@@ -530,7 +541,7 @@ def build_simple_cat2_pdf(output_pdf_path, project_dir):
         "and integrating road elevation gradients from digital mapping services for dynamic elevation-aware energy optimization.",
         body_style
     ))
-    story.append(Spacer(1, 3))
+    story.append(Spacer(1, 2))
 
     # REFERENCES
     story.append(Paragraph("References", h1_style))

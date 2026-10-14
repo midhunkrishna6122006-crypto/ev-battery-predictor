@@ -1,6 +1,7 @@
 """
-Institutional CAT II Mini Project PDF Report Generator (TrustLens Format)
-Generates CAT_II_PROJECT_REPORT.pdf adhering to the CIT CAT II single-column template specification.
+Institutional CAT II Mini Project PDF Report Generator (Hard Copy Print Edition)
+Compiles CAT_II_PROJECT_REPORT.pdf adhering strictly to the CIT institutional template format.
+Removes all hyperlinks and optimizes layout and contrast for physical hard copy submission.
 """
 
 import os
@@ -12,10 +13,11 @@ from reportlab.platypus import (
     SimpleDocTemplate, Paragraph, Spacer, Image, Table, TableStyle, PageBreak, KeepTogether, HRFlowable
 )
 from reportlab.pdfgen import canvas
+import pymupdf
 
-class CAT2NumberedCanvas(canvas.Canvas):
+class HardCopyNumberedCanvas(canvas.Canvas):
     def __init__(self, *args, **kwargs):
-        super(CAT2NumberedCanvas, self).__init__(*args, **kwargs)
+        super(HardCopyNumberedCanvas, self).__init__(*args, **kwargs)
         self._saved_page_states = []
 
     def showPage(self):
@@ -27,24 +29,24 @@ class CAT2NumberedCanvas(canvas.Canvas):
         for state in self._saved_page_states:
             self.__dict__.update(state)
             self.draw_page_decorations(num_pages)
-            super(CAT2NumberedCanvas, self).showPage()
-        super(CAT2NumberedCanvas, self).save()
+            super(HardCopyNumberedCanvas, self).showPage()
+        super(HardCopyNumberedCanvas, self).save()
 
     def draw_page_decorations(self, page_count):
         self.saveState()
         self.setFont("Helvetica", 8)
-        self.setFillColor(colors.HexColor("#555555"))
+        self.setFillColor(colors.HexColor("#333333"))
         
         # Header (pages > 1)
         if self._pageNumber > 1:
-            self.drawString(54, 750, "19MAM56 AML Lab CAT II — VoltWise: EV Battery Digital Twin & Range Optimizer")
+            self.drawString(54, 750, "19MAM56 AML Lab CAT II — VoltWise: EV Battery Digital Twin & Range Optimization")
             self.drawRightString(letter[0] - 54, 750, "CIT Department of Computing")
-            self.setStrokeColor(colors.HexColor("#CCCCCC"))
+            self.setStrokeColor(colors.HexColor("#AAAAAA"))
             self.setLineWidth(0.5)
             self.line(54, 744, letter[0] - 54, 744)
             
         # Footer
-        self.setStrokeColor(colors.HexColor("#CCCCCC"))
+        self.setStrokeColor(colors.HexColor("#AAAAAA"))
         self.setLineWidth(0.5)
         self.line(54, 45, letter[0] - 54, 45)
         self.drawString(54, 32, "Coimbatore Institute of Technology — M.Sc. Artificial Intelligence & Machine Learning")
@@ -53,7 +55,7 @@ class CAT2NumberedCanvas(canvas.Canvas):
         self.restoreState()
 
 
-def build_cat2_pdf(output_pdf_path, project_dir):
+def build_hardcopy_cat2_pdf(output_pdf_path, project_dir):
     vis_dir = os.path.join(project_dir, 'visualizations')
     
     doc = SimpleDocTemplate(
@@ -68,7 +70,7 @@ def build_cat2_pdf(output_pdf_path, project_dir):
     content_width = letter[0] - 108  # 504 pt
     styles = getSampleStyleSheet()
     
-    # Custom styles matching TrustLens format
+    # Custom print styles
     title_main = ParagraphStyle(
         'MainTitle',
         parent=styles['Normal'],
@@ -76,7 +78,7 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         fontSize=20,
         leading=24,
         alignment=1, # Center
-        textColor=colors.HexColor('#0D47A1'),
+        textColor=colors.black,
         spaceAfter=4
     )
 
@@ -87,7 +89,7 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         fontSize=12,
         leading=16,
         alignment=1,
-        textColor=colors.HexColor('#1565C0'),
+        textColor=colors.HexColor('#222222'),
         spaceAfter=3
     )
 
@@ -98,7 +100,7 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         fontSize=10,
         leading=14,
         alignment=1,
-        textColor=colors.HexColor('#37474F'),
+        textColor=colors.HexColor('#444444'),
         spaceAfter=4
     )
 
@@ -109,29 +111,18 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         fontSize=9.5,
         leading=13.5,
         alignment=1,
-        textColor=colors.HexColor('#263238'),
+        textColor=colors.HexColor('#111111'),
         spaceAfter=3
-    )
-
-    links_style = ParagraphStyle(
-        'LinksStyle',
-        parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=8.5,
-        leading=12,
-        alignment=1,
-        textColor=colors.HexColor('#0D47A1'),
-        spaceAfter=12
     )
 
     h1_style = ParagraphStyle(
         'Heading1Custom',
         parent=styles['Heading1'],
         fontName='Helvetica-Bold',
-        fontSize=12,
-        leading=16,
-        textColor=colors.HexColor('#0D47A1'),
-        spaceBefore=12,
+        fontSize=11.5,
+        leading=15.5,
+        textColor=colors.black,
+        spaceBefore=11,
         spaceAfter=5,
         keepWithNext=True
     )
@@ -140,9 +131,9 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         'Heading2Custom',
         parent=styles['Heading2'],
         fontName='Helvetica-Bold',
-        fontSize=10,
-        leading=14,
-        textColor=colors.HexColor('#1565C0'),
+        fontSize=9.8,
+        leading=13.5,
+        textColor=colors.HexColor('#222222'),
         spaceBefore=8,
         spaceAfter=3,
         keepWithNext=True
@@ -153,9 +144,9 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         parent=styles['Normal'],
         fontName='Helvetica',
         fontSize=9,
-        leading=13.5,
+        leading=13.2,
         alignment=4, # Justified
-        textColor=colors.HexColor('#212121'),
+        textColor=colors.black,
         spaceAfter=5
     )
 
@@ -166,7 +157,7 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         fontSize=8.8,
         leading=13,
         alignment=4,
-        textColor=colors.HexColor('#263238')
+        textColor=colors.black
     )
 
     caption_style = ParagraphStyle(
@@ -176,7 +167,7 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         fontSize=8.2,
         leading=11.5,
         alignment=1,
-        textColor=colors.HexColor('#37474F'),
+        textColor=colors.HexColor('#222222'),
         spaceBefore=4,
         spaceAfter=8
     )
@@ -187,8 +178,8 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         fontName='Helvetica-Bold',
         fontSize=8.5,
         leading=11.5,
-        alignment=0, # Flush left in TrustLens format
-        textColor=colors.HexColor('#0D47A1'),
+        alignment=0,
+        textColor=colors.black,
         spaceBefore=8,
         spaceAfter=4,
         keepWithNext=True
@@ -201,9 +192,9 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         fontSize=8.5,
         leading=12,
         alignment=1,
-        textColor=colors.HexColor('#1B5E20'),
-        spaceBefore=4,
-        spaceAfter=4
+        textColor=colors.black,
+        spaceBefore=3,
+        spaceAfter=3
     )
 
     ref_style = ParagraphStyle(
@@ -220,19 +211,13 @@ def build_cat2_pdf(output_pdf_path, project_dir):
 
     story = []
 
-    # ==================== HEADER BLOCK ====================
+    # ==================== HEADER BLOCK (NO URLS / HARD COPY EDITION) ====================
     story.append(Paragraph("VOLTWISE", title_main))
-    story.append(Paragraph("Physics-Informed Battery Digital Twin & Multi-Factor EV Range Optimization", title_sub1))
-    story.append(Paragraph("Using Electrochemical Degradation Kinetics and Gradient-Boosted Blending Ensembles", title_sub2))
+    story.append(Paragraph("Electric Vehicle Driving Range Optimization", title_sub1))
+    story.append(Paragraph("Using Physics-Informed Battery Digital Twin and ML Ensembles", title_sub2))
     story.append(Paragraph("<b>Advanced Machine Learning Lab – CAT II Mini Project</b>", meta_style))
-    story.append(Paragraph("Department of Computing (M.Sc. AI & ML), Coimbatore Institute of Technology, Coimbatore – 641 014", meta_style))
-    story.append(Paragraph(
-        "<b>Author:</b> Midhun Krishna B &nbsp;|&nbsp; "
-        "<b>GitHub:</b> <u>https://github.com/midhunkrishna6122006-crypto/ev-battery-predictor</u> &nbsp;|&nbsp; "
-        "<b>Live App:</b> <u>https://ev-battery-predictor.streamlit.app/</u>",
-        links_style
-    ))
-    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#0D47A1'), spaceBefore=2, spaceAfter=8))
+    story.append(Paragraph("M.Sc. AI & ML, Coimbatore Institute of Technology, Coimbatore", meta_style))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.black, spaceBefore=4, spaceAfter=8))
 
     # Abstract Box
     abstract_text = (
@@ -242,16 +227,16 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         "Health (SOH) fade and Remaining Useful Life (RUL) are continuously simulated via an Arrhenius thermal degradation engine incorporating calendar "
         "aging and depth-of-discharge (DoD) stress. Simultaneously, instantaneous driving range is predicted via an advanced regression ensemble "
         "combining Random Forest, Gradient Boosted Decision Trees (GBDT), and an Optuna Bayesian-tuned XGBoost regressor blended through variance-weighted "
-        "voting. The complete pipeline incorporates 1.5×IQR outlier clipping, 40+ engineered domain features, Principal Component Analysis (PCA) "
+        "voting. The complete pipeline incorporates 1.5x IQR outlier clipping, 40+ engineered domain features, Principal Component Analysis (PCA) "
         "dimensionality reduction, and TreeExplainer SHAP (SHapley Additive exPlanations) interpretability. Benchmarked against baseline linear models, "
-        "the Optuna-tuned XGBoost model achieves an exceptional Mean Absolute Error (MAE) of 9.68 km and an R² score of 0.9589 (a 56.3% error reduction). "
-        "The end-to-end architecture is deployed as a production-grade FastAPI REST service with Pydantic v2 validation and continuously hosted on "
-        "Streamlit Community Cloud with a multi-stage Docker containerization specification."
+        "the Optuna-tuned XGBoost model achieves an exceptional Mean Absolute Error (MAE) of 9.68 km and an R2 score of 0.9589 (a 56.3% error reduction). "
+        "The end-to-end architecture is deployed as a production-grade FastAPI REST service with Pydantic validation schemas, accompanied by a "
+        "containerized interactive dashboard for real-time operational simulation."
     )
     abstract_table = Table([[Paragraph(abstract_text, abstract_style)]], colWidths=[content_width])
     abstract_table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F4F6F9')),
-        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#B0BEC5')),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F8F9FA')),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#777777')),
         ('TOPPADDING', (0, 0), (-1, -1), 8),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
         ('LEFTPADDING', (0, 0), (-1, -1), 10),
@@ -273,69 +258,69 @@ def build_cat2_pdf(output_pdf_path, project_dir):
     ))
     story.append(Paragraph(
         "VoltWise addresses this challenge by coupling a <b>Physics-Informed Battery Digital Twin</b> with an <b>Advanced Machine Learning Blending Ensemble</b>. "
-        "The primary objectives are: (1) curate an 81,000+ record telemetry dataset with $1.5\\times\\text{IQR}$ outlier filtering and domain feature engineering; "
+        "The primary objectives are: (1) curate an 81,000+ record telemetry dataset with 1.5x IQR outlier filtering and domain feature engineering; "
         "(2) model battery SOH, RUL, and thermal stress using Arrhenius degradation kinetics; (3) train, optimize (via Optuna Bayesian search), and benchmark diverse "
-        "regression architectures; (4) explain predictions via TreeExplainer SHAP values; and (5) deliver an interactive full-stack deployment via FastAPI REST services, "
-        "Docker containerization, and public Streamlit Cloud hosting.",
+        "regression architectures; (4) explain predictions via TreeExplainer SHAP values; and (5) deliver a production-style FastAPI REST API with Pydantic "
+        "validation and an interactive simulation dashboard.",
         body_style
     ))
 
     # SECTION 2: DATASET AND PREPROCESSING
     story.append(Paragraph("2. Dataset and Preprocessing", h1_style))
     story.append(Paragraph(
-        "The empirical study employs real-world battery fleet telemetry comprising 81,000+ records combined with 5,000 multi-factorial driving trip "
-        "instances covering 14 operational parameters. Sensor noise and current spikes are handled through $1.5\\times\\text{IQR}$ boundary clipping. "
+        "The empirical evaluation utilizes real-world battery telemetry comprising 81,000+ time-series records combined with 5,000 multi-factorial driving trip "
+        "instances covering 14 operational parameters. Sensor noise and current spikes are handled through 1.5x IQR boundary clipping. "
         "The dataset is partitioned into 70% training, 15% validation, and 15% hold-out test sets using stratified sampling with a fixed random seed. "
         "Continuous variables are scaled using z-score normalization fitted strictly on the training partition to avoid target leakage.",
         body_style
     ))
 
     # Table 1: Dataset Summary
-    story.append(Paragraph("<b>Table 1. Dataset Summary & Telemetry Feature Schema</b>", table_title_style))
+    story.append(Paragraph("<b>Table 1. Dataset summary</b>", table_title_style))
     t1_data = [
-        ['Variable / Component', 'Value / Scope', 'Analytical Role'],
-        ['Fleet Telemetry Observations', '81,000+ sensor records', 'Dynamic battery voltage, current, and temperature'],
-        ['Driving Trip Observations', '5,000 multi-factorial trips', 'Training & evaluation driving profiles'],
-        ['Raw Telemetry Attributes', '14 physical attributes', 'Speed, SOC, ambient temp, wind, humidity, elevation, HVAC'],
-        ['Engineered Domain Features', '40+ mathematical features', 'Usable Energy, Weather Severity Index, interaction cross-terms'],
-        ['Dimensionality Reduction', '2 Principal Components (PCA)', 'Captures >65% cumulative feature covariance'],
-        ['Train / Validation / Test', '70% / 15% / 15%', 'Stratified evaluation protocol with zero label leakage'],
-        ['Target Prediction Variable', 'Real-world driving range (km)', 'Continuous regression ground-truth'],
+        ['Variable / Dataset', 'Value', 'Role'],
+        ['Fleet telemetry records', '81,000+ sensor records', 'Dynamic battery voltage, current, and cell temperature'],
+        ['Driving trip instances', '5,000 driving cycles', 'Training & evaluation multi-factorial driving profiles'],
+        ['Raw telemetry attributes', '14 physical attributes', 'Speed, SOC, ambient temp, wind, humidity, elevation, HVAC'],
+        ['Engineered domain features', '40+ mathematical features', 'Usable Energy, Weather Severity Index, interaction cross-terms'],
+        ['Dimensionality reduction', '2 Principal Components (PCA)', 'Captures >65% cumulative feature covariance'],
+        ['Train / validation / test', '70% / 15% / 15%', 'Stratified evaluation protocol with zero label leakage'],
+        ['Target prediction variable', 'Real-world range (km)', 'Continuous regression ground-truth'],
     ]
     t1 = Table(t1_data, colWidths=[150, 150, 204])
     t1.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0D47A1')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#222222')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 4),
         ('TOPPADDING', (0, 0), (-1, 0), 4),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 7.5),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CFD8DC')),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#FFFFFF'), colors.HexColor('#F8F9FA')]),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#999999')),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F9FA')]),
     ]))
     story.append(t1)
     story.append(Spacer(1, 6))
 
     story.append(Paragraph(
-        "Domain-engineered features capture non-linear vehicle dynamics: (1) <i>Usable Energy</i>: <i>E</i><sub>usable</sub> = <i>C</i><sub>nominal</sub> · SOH · SOC; "
+        "Engineered features incorporate vehicle kinematic laws: (1) <i>Battery Usable Energy</i>: <i>E</i><sub>usable</sub> = <i>C</i><sub>nominal</sub> · SOH · SOC; "
         "(2) <i>Weather Severity Index</i>: <i>I</i><sub>weather</sub> = 0.3 · Precip + 0.2 · <b>1</b><sub>(Wind &gt; 20)</sub> + 0.5 · <b>1</b><sub>(|<i>T</i> - 20| &gt; 15)</sub>; "
-        "and (3) Dynamic power interactions: Speed × Temp and SOH × Age.",
+        "and (3) Dynamic power interactions: Speed × Ambient Temperature, SOH × Calendar Age.",
         body_style
     ))
 
     # SECTION 3: SYSTEM ARCHITECTURE
-    story.append(Paragraph("3. VoltWise Cyber-Physical Architecture", h1_style))
+    story.append(Paragraph("3. VoltWise System Architecture", h1_style))
     
-    # ASCII Pipeline Table matching TrustLens Figure 1
+    # Box Pipeline Flow matching TrustLens Figure 1
     pipe_data = [
         [
-            Paragraph("<b>Input</b><br/>Fleet Telemetry +<br/>Operational Metadata", abstract_style),
+            Paragraph("<b>Input</b><br/>Fleet telemetry +<br/>operational metadata", abstract_style),
             Paragraph("→", abstract_style),
-            Paragraph("<b>Dual Branch</b><br/>Physics: Arrhenius Twin<br/>ML: Blending Ensemble", abstract_style),
+            Paragraph("<b>Dual branch</b><br/>Physics: Arrhenius Twin<br/>ML: Blending Ensemble", abstract_style),
             Paragraph("→", abstract_style),
-            Paragraph("<b>Weighted Fusion</b><br/><i>ŷ</i><sub>ens</sub> = 0.35 RF + 0.35 GBDT<br/>+ 0.20 XGB + 0.10 Lin", abstract_style),
+            Paragraph("<b>Weighted fusion</b><br/><i>ŷ</i><sub>ens</sub> = 0.35 RF + 0.35 GBDT<br/>+ 0.20 XGB + 0.10 Lin", abstract_style),
             Paragraph("→", abstract_style),
             Paragraph("<b>Serving & API</b><br/>FastAPI REST Service<br/>Pydantic Validation", abstract_style),
             Paragraph("→", abstract_style),
@@ -344,24 +329,25 @@ def build_cat2_pdf(output_pdf_path, project_dir):
     ]
     t_pipe = Table(pipe_data, colWidths=[90, 14, 105, 14, 115, 14, 90, 14, 85])
     t_pipe.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F0F4F8')),
-        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#0D47A1')),
+        ('BACKGROUND', (0, 0), (-1, -1), colors.HexColor('#F5F5F5')),
+        ('BOX', (0, 0), (-1, -1), 1, colors.HexColor('#333333')),
         ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
         ('TOPPADDING', (0, 0), (-1, -1), 6),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
     ]))
     story.append(t_pipe)
-    story.append(Paragraph("<b>Figure 1.</b> VoltWise end-to-end pipeline: Dual-branch physics-telemetry encoding, weighted ensemble fusion, REST serving, and explainable output.", caption_style))
+    story.append(Paragraph("<b>Figure 1.</b> VoltWise pipeline: dual-branch physics-telemetry encoding, weighted ensemble fusion, REST serving, and explainable output.", caption_style))
 
     story.append(Paragraph(
         "The physical degradation engine simulates cumulative capacity loss <i>D</i><sub>total</sub> through coupled calendar and cycling stress accelerated by temperature:",
         body_style
     ))
     story.append(Paragraph("D_total = (k_cal · t_days + k_cyc · N_cyc) · exp(k_temp · (T - 25) / 25) · (1 + k_DoD · DoD)     (1)", eq_style))
+    story.append(Paragraph("where k_cal = 0.00005 day^-1, k_cyc = 0.0001 cycle^-1, k_temp = 0.03, and k_DoD = 0.20 for LiNiMnCoO2 cells.", body_style))
     story.append(Paragraph("SOH(t) = max(0.70, 1.0 - D_total)     (2)", eq_style))
     story.append(Paragraph("RUL_days = (SOH_current - 0.80) / (k_cal + k_cyc · n_daily_cycles)     (3)", eq_style))
-    story.append(Paragraph("ŷ_ensemble = 0.35 · ŷ_RF + 0.35 · ŷ_GBDT + 0.20 · ŷ_XGBoost + 0.10 · ŷ_Linear     (4)", eq_style))
+    story.append(Paragraph("y_ensemble = 0.35 · y_RF + 0.35 · y_GBDT + 0.20 · y_XGBoost + 0.10 · y_Linear     (4)", eq_style))
     story.append(Paragraph("C_safe = C_max · SOH · min(1.0, exp(-0.05 · max(0, T - 35)))     (5)", eq_style))
 
     # Add PCA Figure
@@ -375,12 +361,12 @@ def build_cat2_pdf(output_pdf_path, project_dir):
     # SECTION 4: MACHINE LEARNING METHODOLOGY
     story.append(Paragraph("4. Machine Learning Methodology", h1_style))
     story.append(Paragraph(
-        "The modeling workflow comprises data ingestion, $1.5\\times\\text{IQR}$ outlier clipping, domain feature engineering, baseline training, "
+        "The modeling workflow comprises data ingestion, 1.5x IQR outlier clipping, domain feature engineering, baseline training, "
         "Bayesian hyperparameter optimization, model blending, and SHAP interpretability. Five architectures are systematically evaluated: "
         "(A) Linear Regression Baseline, (B) Random Forest Regressor, (C) Gradient Boosted Decision Trees (GBDT), (D) Optuna-tuned XGBoost, "
         "and (E) Weighted Blending Ensemble. Optuna [6] executes a Tree-structured Parzen Estimator (TPE) search over 50 trials across <i>n_estimators</i> ∈ [50, 150], "
         "<i>max_depth</i> ∈ [3, 8], <i>learning_rate</i> ∈ [0.02, 0.20], and <i>subsample</i> ∈ [0.6, 1.0], targeting minimal validation Mean Absolute Error (MAE). "
-        "Model selection is based on hold-out MAE, RMSE, <i>R</i>² goodness-of-fit, and relative latency.",
+        "Model selection is based on hold-out MAE, Root Mean Squared Error (RMSE), <i>R</i>² goodness-of-fit, and relative latency.",
         body_style
     ))
 
@@ -393,31 +379,31 @@ def build_cat2_pdf(output_pdf_path, project_dir):
     ))
 
     # Table 2: Partition
-    story.append(Paragraph("<b>Table 2. Experimental Telemetry Partition & Operational Coverage</b>", table_title_style))
+    story.append(Paragraph("<b>Table 2. Telemetry partition and operational coverage</b>", table_title_style))
     t2_data = [
         ['Partition Split', 'Instance Count', 'Operating Conditions Covered', 'Role in Pipeline'],
-        ['Training Partition (70%)', '3,500 trips', 'Urban, highway, rural, diverse temperatures', 'Model weight estimation'],
+        ['Training Partition (70%)', '3,500 trips', 'Urban, highway, rural, diverse temperatures', 'Model parameter estimation'],
         ['Validation Partition (15%)', '750 trips', 'Temperature extremes, dynamic elevation deltas', 'Optuna Bayesian hyperparameter search'],
         ['Hold-Out Test Set (15%)', '750 trips', 'Unseen vehicle profiles, mixed driving styles', 'Final unbiased performance benchmarking'],
     ]
     t2 = Table(t2_data, colWidths=[130, 95, 165, 114])
     t2.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0D47A1')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#222222')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 4),
         ('TOPPADDING', (0, 0), (-1, 0), 4),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 7.5),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CFD8DC')),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#FFFFFF'), colors.HexColor('#F8F9FA')]),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#999999')),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F9FA')]),
     ]))
     story.append(t2)
     story.append(Spacer(1, 6))
 
     # Table 3: Benchmarks
-    story.append(Paragraph("<b>Table 3. Test-Set Model Comparison Benchmarking Results</b>", table_title_style))
+    story.append(Paragraph("<b>Table 3. Test-set model comparison</b>", table_title_style))
     t3_data = [
         ['Model Architecture', 'MAE (km) ↓', 'RMSE (km) ↓', 'R² Score ↑', 'Relative Latency', 'Rank'],
         ['A. Linear Regression Baseline', '22.144', '29.774', '0.8112', '< 1 ms', '5'],
@@ -428,8 +414,8 @@ def build_cat2_pdf(output_pdf_path, project_dir):
     ]
     t3 = Table(t3_data, colWidths=[164, 85, 85, 85, 55, 30])
     t3.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#0D47A1')),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#222222')),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 0), (-1, 0), 8),
         ('BOTTOMPADDING', (0, 0), (-1, 0), 4),
@@ -437,10 +423,10 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         ('ALIGN', (1, 0), (-1, -1), 'CENTER'),
         ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
         ('FONTSIZE', (0, 1), (-1, -1), 7.5),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#CFD8DC')),
-        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.HexColor('#FFFFFF'), colors.HexColor('#F8F9FA')]),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#999999')),
+        ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#F8F9FA')]),
         ('FONTNAME', (0, 4), (-1, 4), 'Helvetica-Bold'),
-        ('BACKGROUND', (0, 4), (-1, 4), colors.HexColor('#E8F5E9')),
+        ('BACKGROUND', (0, 4), (-1, 4), colors.HexColor('#EAEAEA')),
     ]))
     story.append(t3)
     story.append(Spacer(1, 8))
@@ -453,7 +439,7 @@ def build_cat2_pdf(output_pdf_path, project_dir):
         body_style
     ))
 
-    # Add Figure 2 & 3: Benchmarks and Parity
+    # Add Figures
     fig1_path = os.path.join(vis_dir, 'fig1_model_benchmarking.png')
     if os.path.exists(fig1_path):
         story.append(KeepTogether([
@@ -475,7 +461,6 @@ def build_cat2_pdf(output_pdf_path, project_dir):
             Paragraph("<b>Figure 5.</b> Residual error analysis: Gaussian error distribution (μ ≈ 0.04 km) and homoscedasticity scatter.", caption_style)
         ]))
 
-    # SHAP Feature Attribution
     fig5_path = os.path.join(vis_dir, 'fig5_shap_feature_importance.png')
     if os.path.exists(fig5_path):
         story.append(KeepTogether([
@@ -499,10 +484,10 @@ def build_cat2_pdf(output_pdf_path, project_dir):
     story.append(Paragraph(
         "<b>1) FastAPI REST API Service (4 Marks):</b> Implemented in <code>api.py</code> with strict Pydantic v2 validation schemas. Exposes typed endpoints for "
         "<code>POST /predict/range</code>, <code>POST /battery/health</code>, and <code>POST /battery/optimize-charging</code> with automatic interactive "
-        "Swagger documentation at <code>http://localhost:8000/docs</code>.<br/>"
-        "<b>2) Multi-Stage Docker Containerization:</b> Encapsulated within a standardized <code>Dockerfile</code> exposing ports 7860/8000 for cloud-agnostic execution.<br/>"
-        "<b>3) Continuous Public Cloud Hosting (4 Marks):</b> Hosted continuously on Streamlit Community Cloud linked directly to GitHub at "
-        "<b>https://ev-battery-predictor.streamlit.app/</b>, providing instant public access without cold-start penalties.",
+        "OpenAPI/Swagger documentation accessible via local port 8000.<br/>"
+        "<b>2) Containerization:</b> Encapsulated within a multi-stage Dockerfile exposing ports 7860 and 8000 for reproducible deployment across diverse operating platforms.<br/>"
+        "<b>3) Interactive Simulation Dashboard:</b> A full-stack web dashboard provides operational controls for fleet managers to simulate temperature swings, "
+        "driving styles, and battery health trajectories with real-time updates.",
         body_style
     ))
 
@@ -511,8 +496,8 @@ def build_cat2_pdf(output_pdf_path, project_dir):
     story.append(Paragraph(
         "VoltWise demonstrates an end-to-end cyber-physical application of advanced machine learning for EV battery prognostics and driving range optimization. "
         "By fusing Arrhenius electro-chemical degradation with Optuna-tuned gradient boosted decision trees, the system achieved a <b>56.3% reduction in prediction error</b> "
-        "(R² = 0.9589, MAE &lt; 10 km). The complete pipeline integrates physics-based digital twins, Bayesian hyperparameter optimization, SHAP explainability, "
-        "FastAPI REST serving, Docker packaging, and live cloud deployment.",
+        "(R² = 0.9589, MAE = 9.68 km). The complete pipeline integrates physics-based digital twins, Bayesian hyperparameter optimization, SHAP explainability, "
+        "FastAPI REST serving, and Docker container packaging.",
         body_style
     ))
     story.append(Paragraph(
@@ -536,11 +521,11 @@ def build_cat2_pdf(output_pdf_path, project_dir):
     for ref in refs:
         story.append(Paragraph(ref, ref_style))
 
-    doc.build(story, canvasmaker=CAT2NumberedCanvas)
-    print(f"Successfully compiled CAT II Mini Project Report PDF: {output_pdf_path}")
+    doc.build(story, canvasmaker=HardCopyNumberedCanvas)
+    print(f"Successfully compiled Hard Copy CAT II Report PDF: {output_pdf_path}")
 
 
 if __name__ == '__main__':
     project_root = r'c:\Users\midhu\Downloads\ev-battery-predictor-main\ev-battery-predictor-main'
     pdf_out = os.path.join(project_root, 'CAT_II_PROJECT_REPORT.pdf')
-    build_cat2_pdf(pdf_out, project_root)
+    build_hardcopy_cat2_pdf(pdf_out, project_root)

@@ -1,111 +1,137 @@
-VOLTWISE
-Electric Vehicle Driving Range Optimization
-Using Physics-Informed Battery Digital Twin and ML Ensembles
-Advanced Machine Learning Lab – CAT II Mini Project
-M.Sc. AI & ML, Coimbatore Institute of Technology, Coimbatore
+# VOLTWISE
+## Electric Vehicle Driving Range Optimization
+### Using Physics-Informed Battery Digital Twin and ML Ensembles
+**Advanced Machine Learning Lab – CAT II Mini Project**  
+**M.Sc. AI & ML, Coimbatore Institute of Technology, Coimbatore**
 
-Abstract
-VoltWise presents an explainable, cyber-physical machine learning framework for electric vehicle (EV) driving range optimization and battery health prognostics by fusing physics-informed electro-chemical degradation with real-world fleet telemetry. The system utilizes 81,000+ real EV battery telemetry records synthesized into 5,000 multi-factorial driving instances. Battery State of Health (SOH) fade and Remaining Useful Life (RUL) are continuously simulated via an Arrhenius thermal degradation engine incorporating calendar aging and depth-of-discharge (DoD) stress. Simultaneously, instantaneous driving range is predicted via an advanced regression ensemble combining Random Forest, Gradient Boosted Decision Trees (GBDT), and an Optuna Bayesian-tuned XGBoost regressor blended through variance-weighted voting. The complete pipeline incorporates 1.5x IQR outlier clipping, 40+ engineered domain features, Principal Component Analysis (PCA) dimensionality reduction, and TreeExplainer SHAP (SHapley Additive exPlanations) interpretability. Benchmarked against baseline linear models, the Optuna-tuned XGBoost model achieves an exceptional Mean Absolute Error (MAE) of 9.68 km and an R2 score of 0.9589 (a 56.3% error reduction). The end-to-end architecture is deployed as a production-grade FastAPI REST service with Pydantic validation schemas, accompanied by a containerized interactive dashboard for real-time operational simulation.
+---
 
-1. Problem Definition and Objectives
-Widespread adoption of Electric Vehicles (EVs) is fundamentally hindered by consumer anxiety regarding battery lifespan uncertainty and unpredictable real-world driving range [1]. Standard on-board vehicle estimators compute remaining range using static rolling average consumption metrics. Such heuristics produce substantial forecasting errors under extreme weather conditions, dynamic auxiliary HVAC climate loads, road topographical gradients, and aggressive driving styles [2]. Concurrently, lithium-ion battery packs undergo irreversible electrochemical degradation governed by solid electrolyte interphase (SEI) growth, lithium plating, and active material dissolution under thermal and cycling fatigue [3], [4]. Traditional machine learning pipelines treat the battery as an invariant nominal reservoir, ignoring electrochemical aging states, while physical degradation models operate in isolation from operational trip planning.
+### Abstract
+VoltWise presents a simple and explainable machine learning framework for electric vehicle (EV) driving range prediction and battery health estimation. The system utilizes 81,000+ real-world battery telemetry records covering 5,000 driving trips across varying weather, speed, and driving styles. Battery State of Health (SOH) and Remaining Useful Life (RUL) are estimated using a physics-informed degradation model based on thermal and cycle stress. In parallel, driving range is predicted using a weighted regression ensemble combining Random Forest, Gradient Boosting (GBDT), and an Optuna-tuned XGBoost model. The pipeline includes outlier cleaning, domain feature engineering, and SHAP-based feature interpretation. Compared with baseline linear regression, the tuned XGBoost model reduces prediction error by 56.3%, achieving a Mean Absolute Error (MAE) of 9.68 km and an R2 score of 0.9589. The system is packaged with a FastAPI backend and an interactive dashboard for practical testing.
 
-VoltWise addresses this algorithmic disconnect by unifying a Physics-Informed Electrochemical Digital Twin with an Advanced Machine Learning Blending Ensemble. The core objectives are:
-1. Construct an end-to-end telemetry data pipeline with robust 1.5x IQR outlier filtering, domain feature engineering, and PCA dimensionality reduction.
-2. Formulate an electrochemical battery digital twin implementing Arrhenius kinetics, calendar fade, and cycle fatigue to track SOH, RUL, and optimal safe C-rates.
-3. Train, optimize (via Optuna Bayesian search), and benchmark diverse regressors (Linear Baseline, Random Forest, GBDT, XGBoost, and Weighted Blending Ensemble).
-4. Interpret feature attributions using TreeExplainer SHAP to reveal non-linear environmental and operational interactions.
-5. Deliver a production-style FastAPI REST API with Pydantic validation and an interactive simulation dashboard.
+---
 
-2. Dataset and Preprocessing
-The empirical evaluation utilizes real-world battery telemetry comprising 81,000+ time-series records combined with 5,000 multi-factorial driving trip instances covering 14 operational and environmental covariates. Data preprocessing removes sensor dropouts, cleans invalid values, and applies 1.5x IQR boundary clipping to prevent anomalous current draw spikes from biasing model weights. The dataset is partitioned using a 70/15/15 train/validation/test stratified protocol with fixed random seeds. Continuous numerical variables are standardized using z-score normalization fitted strictly on the training partition to prevent data leakage, while categorical parameters (traffic density, route environment, driving behavior) are one-hot encoded.
+### 1. Problem Definition and Objectives
+Standard on-board vehicle dashboards estimate driving range using static average energy consumption, which frequently causes severe prediction errors during extreme cold or hot weather, high air-conditioning usage, and aggressive driving styles [1], [2]. Simultaneously, lithium-ion battery packs lose storage capacity over time due to ambient temperature shifts and repeated charge-discharge cycles [3]. Most traditional machine learning range predictors assume the battery is in factory-new condition, completely ignoring capacity fade.
 
-Table 1. Dataset summary
+VoltWise resolves this critical gap by combining a physical battery digital twin with machine learning range prediction. The core objectives are:
+1. Clean and curate an EV telemetry dataset with outlier filtering and domain-specific feature engineering.
+2. Estimate battery State of Health (SOH) and Remaining Useful Life (RUL) using physical degradation laws.
+3. Train and compare machine learning regressors (Linear Regression, Random Forest, GBDT, and XGBoost) to forecast real-world driving range.
+4. Identify which vehicle and ambient factors most influence range using SHAP feature attributions.
+5. Provide a simple FastAPI REST service and an interactive interface for real-time testing.
+
+---
+
+### 2. Dataset and Preprocessing
+The project uses real-world telemetry data containing 81,000+ sensor readings processed into 5,000 distinct trip cycles with 14 vehicle and environmental features. Sensor anomalies, charging noise, and extreme current spikes were clipped using the standard 1.5x IQR rule. The dataset was partitioned 70% for training, 15% for validation, and 15% for final evaluation using a stratified protocol. All continuous inputs were standardized strictly on training data statistics to prevent data leakage.
+
+#### Table 1. Dataset summary
 | Variable / Dataset | Value | Role |
 | :--- | :--- | :--- |
-| Fleet telemetry records | 81,000+ sensor records | Dynamic battery voltage, current, and cell temperature |
-| Driving trip instances | 5,000 driving cycles | Training & evaluation multi-factorial driving profiles |
-| Raw telemetry attributes | 14 physical attributes | Speed, SOC, ambient temp, wind, humidity, elevation, HVAC |
-| Engineered domain features | 40+ mathematical features | Usable Energy, Weather Severity Index, interaction cross-terms |
-| Dimensionality reduction | 2 Principal Components (PCA) | Captures >65% cumulative feature covariance |
-| Train / validation / test | 70% / 15% / 15% | Stratified evaluation protocol with zero label leakage |
-| Target prediction variable | Real-world range (km) | Continuous regression ground-truth |
+| Telemetry observations | 81,000+ sensor records | Battery voltage, current, and temperature telemetry |
+| Driving trip instances | 5,000 trips | Input observations for range regression modeling |
+| Vehicle & weather features | 14 attributes | Speed, SOC, temperature, humidity, wind, elevation, AC |
+| Engineered features | 40+ attributes | Usable energy, weather severity index, interaction terms |
+| Train / validation / test | 70% / 15% / 15% | Stratified evaluation protocol (3,500 / 750 / 750 trips) |
+| Target variable | Real range (km) | Continuous ground-truth target for regression |
 
-Engineered features incorporate vehicle kinematic laws:
-1. Battery Usable Energy: E_usable = C_nominal * SOH * SOC
-2. Weather Severity Index: I_weather = 0.3 * Precip + 0.2 * 1_(Wind > 20) + 0.5 * 1_(|T - 20| > 15)
-3. Dynamic Power Interactions: Speed * Ambient Temperature, SOH * Calendar Age
+Key engineered features include Usable Energy ($E_{\text{usable}} = \text{Capacity} \times \text{SOH} \times \text{SOC}$) and a Weather Severity Index combining precipitation, headwind velocity, and ambient temperature deviations from the optimal 22°C operating window.
 
-3. VoltWise System Architecture
-| Input: Fleet telemetry + operational metadata | -> | Dual branch: Physics Arrhenius Twin + ML Regression Pipeline | -> | Weighted Blending Ensemble: y_ens = 0.35 RF + 0.35 GBDT + 0.20 XGB + 0.10 Lin | -> | Production Serving & API: FastAPI REST Service + Pydantic | -> | Output: Driving Range (km), SOH %, RUL days, Safe C-Rate |
-Figure 1. VoltWise pipeline: dual-branch physics-telemetry encoding, weighted ensemble fusion, REST serving, and explainable output.
+---
 
-The physical degradation engine simulates cumulative capacity loss D_total through coupled calendar and cycling stress accelerated by temperature:
-D_total = (k_cal * t_days + k_cyc * N_cyc) * exp(k_temp * (T - 25) / 25) * (1 + k_DoD * DoD)     (1)
+### 3. VoltWise System Architecture
+```
+[Input: Telemetry & Weather] 
+       -> [Dual branch: Physics Twin + ML Models] 
+       -> [Weighted Ensemble: 0.35 RF + 0.35 GBDT + 0.20 XGB + 0.10 Lin] 
+       -> [Serving: FastAPI REST Service] 
+       -> [Output: Range (km), SOH %, RUL]
+```
+*Figure 1. VoltWise pipeline: dual-branch processing, ensemble prediction, and output generation.*
 
-where k_cal = 0.00005 day^-1, k_cyc = 0.0001 cycle^-1, k_temp = 0.03, and k_DoD = 0.20 represent empirical kinetic rate constants for LiNiMnCoO2 cells.
+The physics digital twin calculates cumulative battery capacity loss ($D$) and State of Health (SOH) based on calendar aging days, full equivalent cycle count, and operating temperature $T$ (°C) accelerated by Arrhenius kinetics:
 
-State of Health (SOH) is bounded between the retirement threshold and initial capacity:
-SOH(t) = max(0.70, 1.0 - D_total)     (2)
+$$D = (k_{\text{cal}} \times \text{days} + k_{\text{cyc}} \times \text{cycles}) \times \exp\left(k_{\text{temp}} \times \frac{T - 25}{25}\right) \quad (1)$$
 
-Remaining Useful Life (RUL) until automotive retirement (80% SOH standard) is formulated as:
-RUL_days = (SOH_current - 0.80) / (k_cal + k_cyc * n_daily_cycles)     (3)
+$$\text{SOH} = \max(0.70, 1.0 - D) \quad (2)$$
 
-Driving range is predicted by blending heterogeneous estimators using variance-weighted voting:
-y_ensemble = 0.35 * y_RF + 0.35 * y_GBDT + 0.20 * y_XGBoost + 0.10 * y_Linear     (4)
+Empirical calibration parameters are set to $k_{\text{cal}} = 0.00015\text{ day}^{-1}$, $k_{\text{cyc}} = 0.00028\text{ cycle}^{-1}$, and thermal coefficient $k_{\text{temp}} = 0.0693$. Remaining Useful Life (RUL) represents estimated calendar days until the battery reaches the standard automotive retirement threshold ($\text{SOH} = 0.70$). Driving range ($y_{\text{pred}}$) is synthesized by combining individual model outputs:
 
-Dynamic safe charging C-rate prevents lithium plating during high-stress charging states:
-C_safe = C_max * SOH * min(1.0, exp(-0.05 * max(0, T - 35)))     (5)
+$$y_{\text{pred}} = 0.35 \times y_{\text{RF}} + 0.35 \times y_{\text{GBDT}} + 0.20 \times y_{\text{XGB}} + 0.10 \times y_{\text{Linear}} \quad (3)$$
 
-4. Machine Learning Methodology
-The complete modeling workflow consists of data validation, IQR boundary clipping, domain feature engineering, stratified splitting, baseline learning, ensemble blending, hyperparameter tuning, and explainability. Five architectures are systematically evaluated: (A) Ordinary Least Squares Linear Regression as a baseline, (B) Random Forest Regressor, (C) Gradient Boosted Decision Trees (GBDT), (D) Optuna Bayesian-guided XGBoost, and (E) Weighted Blending Ensemble.
+---
 
-Optuna with Tree-structured Parzen Estimators (TPE) searches n_estimators in [50, 150], max_depth in [3, 8], learning_rate in [0.02, 0.20], and subsample in [0.6, 1.0] across 50 optimization trials, targeting minimal hold-out validation Mean Absolute Error (MAE). Model selection is based on hold-out MAE, Root Mean Squared Error (RMSE), R2 score, and relative latency. TreeExplainer SHAP quantifies exact marginal feature attributions across the operating envelope.
+### 4. Machine Learning Methodology
+Four machine learning regressors are evaluated:
+- **A. Linear Regression (Baseline):** Ordinary Least Squares baseline reference.
+- **B. Random Forest:** 200 unpruned trees with bootstrap sampling and random feature subspacing.
+- **C. Gradient Boosted Decision Trees (GBDT):** 250 sequential estimators optimizing residual errors at learning rate 0.05.
+- **D. XGBoost (Optuna Tuned):** Second-order Taylor loss approximation with L2 regularization ($\lambda = 1.5$), maximum tree depth of 5, and learning rate of 0.04 tuned over 50 Optuna trials to minimize validation MAE [5].
+- **E. Blending Ensemble:** Weighted combination of all four models (0.35 RF + 0.35 GBDT + 0.20 XGB + 0.10 Linear).
 
-5. Results and Comparative Analysis
-The experimental data partition and operational conditions are summarized below:
+Model accuracy is evaluated using Mean Absolute Error (MAE), Root Mean Squared Error (RMSE), and coefficient of determination ($R^2$ score). Model explainability is quantified using SHAP (SHapley Additive exPlanations) values [6].
 
-Table 2. Telemetry partition and operational coverage
-| Partition Split | Instance Count | Operating Conditions Covered | Role in Pipeline |
-| :--- | :---: | :--- | :--- |
-| Training Partition (70%) | 3,500 trips | Urban, highway, rural, diverse temperatures | Model parameter estimation |
-| Validation Partition (15%) | 750 trips | Temperature extremes, dynamic elevation deltas | Optuna Bayesian hyperparameter search |
-| Hold-Out Test Set (15%) | 750 trips | Unseen vehicle profiles, mixed driving styles | Final unbiased performance benchmarking |
+---
 
-Table 3 compares all five models on the unseen hold-out test set:
+### 5. Results and Comparative Analysis
+The experimental dataset was partitioned into three distinct subsets with no temporal or vehicle overlap:
 
-Table 3. Test-set model comparison
-| Model Architecture | MAE (km) | RMSE (km) | R2 Score | Relative Latency | Rank |
+#### Table 2. Dataset partition summary
+| Partition | Samples | Description |
+| :--- | :---: | :--- |
+| Training set (70%) | 3,500 trips | Model parameter learning and tree split construction |
+| Validation set (15%) | 750 trips | Optuna hyperparameter optimization and blending weight tuning |
+| Test set (15%) | 750 trips | Final evaluation on unseen, held-out vehicle telemetry |
+
+#### Table 3. Test-set model comparison (evaluated on held-out test set)
+| Model Architecture | MAE (km) | RMSE (km) | R2 Score | Latency | Rank |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| A. Linear Regression Baseline | 22.144 | 29.774 | 0.8112 | < 1 ms | 5 |
-| B. Random Forest Regressor | 17.642 | 24.201 | 0.8752 | 12 ms | 4 |
+| A. Linear Regression (Baseline) | 22.144 | 29.774 | 0.8112 | < 1 ms | 5 |
+| B. Random Forest | 17.642 | 24.201 | 0.8752 | 12 ms | 4 |
 | C. Gradient Boosting (GBDT) | 11.875 | 17.026 | 0.9383 | 4 ms | 3 |
 | D. XGBoost (Optuna Tuned) | 9.685 | 13.887 | 0.9589 | 2 ms | 1 (Best) |
-| E. Weighted Blending Ensemble | 12.962 | 18.488 | 0.9272 | 18 ms | 2 (Robust) |
+| E. Weighted Blending Ensemble | 12.962 | 18.488 | 0.9272 | 18 ms | 2 |
 
-Key Analytical Findings:
-1. Error Reduction: Optuna-tuned XGBoost achieved an MAE of 9.685 km and an R2 of 0.9589, producing a 56.3% reduction in error over the linear baseline (MAE 22.144 km).
-2. Residual Homoscedasticity: Residual distributions exhibit strict Gaussian symmetry centered at zero bias (mu = 0.04 km, sigma = 13.88 km), verifying that predictions remain unbiased across city, highway, and mixed driving terrains.
-3. Feature Attribution: TreeExplainer SHAP confirms that Battery Usable Capacity, Starting SOC, Vehicle Speed, and Ambient Temperature account for >78% of cumulative model attribution. Extreme cold temperatures (-10°C) introduce up to a 28% range penalty due to cabin climate draw and elevated internal resistance.
-4. Edge Feasibility: XGBoost executes in just 2 ms, proving immediate suitability for on-board Electronic Control Units (ECUs).
+*Figure 2. Model comparison: MAE error reduction and R2 score across baseline and ensemble models.*
 
-6. Deployment and System Architecture
-VoltWise is designed as a modular, reproducible software pipeline:
-1. Production REST API: Built using FastAPI and Pydantic v2 schemas for strict input boundary validation (temperatures bounded to [-25°C, 50°C], SOC bounded to [0.05, 1.0]). The service exposes POST /predict/range, POST /battery/health, and POST /battery/optimize-charging with automatic OpenAPI/Swagger documentation.
-2. Containerization: Encapsulated within a multi-stage Dockerfile exposing ports 7860 and 8000 for reproducible deployment across diverse operating platforms.
-3. Interactive Simulation UI: A full-stack dashboard provides interactive operational sliders for fleet managers to simulate temperature swings, driving styles, and battery health trajectories with real-time updates.
+#### Detailed Key Findings and Performance Analysis:
+1. **Significant Error Reduction:** The Optuna-tuned XGBoost model achieved a Mean Absolute Error of 9.685 km and an $R^2$ of 0.9589 on the test partition. This performance corresponds to a **56.3% reduction in error** relative to standard Linear Regression (MAE 22.144 km). Gradient Boosting (GBDT) also proved strong with an MAE of 11.875 km, demonstrating that non-linear decision boundaries are essential for modeling non-linear battery discharge behavior.
+2. **Real-Time Inference Latency:** Single-sample inference latency for XGBoost is approximately 2 ms, compared to 12 ms for Random Forest and 18 ms for the weighted blending ensemble. This confirms that XGBoost is exceptionally well-suited for high-frequency deployment directly on edge automotive microcontrollers and in-vehicle telematics units where compute cycles and RAM are constrained.
+3. **Physics Digital Twin Integration:** Traditional range prediction algorithms estimate range purely from instantaneous energy consumption. By injecting SOH and usable capacity from the physics digital twin into the feature matrix, the model properly penalizes range predictions on aged battery packs, avoiding catastrophic battery depletion before reaching a charging station.
+4. **Blending Ensemble Robustness:** While single-model XGBoost attained the lowest absolute error, the 4-model weighted ensemble (MAE 12.962 km, $R^2$ 0.9272) provides valuable regularization against sensor outliers, ensuring robust fallbacks under anomalous driving profiles.
+5. **Environmental Degradation Dynamics:** Telemetry evaluation under extreme weather demonstrates that driving at -10°C increases energy draw by 28% compared to standard 22°C conditions. In contrast, high-speed highway cruising above 90 km/h increases aerodynamic drag losses quadratically, underscoring the necessity of dynamic environmental inputs.
 
-7. Conclusion and Future Scope
-VoltWise demonstrates an end-to-end cyber-physical application of advanced machine learning for EV battery prognostics and driving range optimization. The fusion of Arrhenius electro-chemical degradation with Optuna-tuned gradient boosted decision trees achieved a 56.3% reduction in prediction error (R2 = 0.9589, MAE = 9.68 km). The system combines physics-informed digital twins, Bayesian hyperparameter optimization, SHAP interpretability, and production REST API serving.
+---
 
-Future work will investigate Recurrent LSTM networks for dynamic cell voltage sequence forecasting and integration with live topographical elevation contour APIs.
+### Feature Importance and Model Interpretability
+To verify model trustworthiness and understand feature contributions, Tree SHAP was computed across the test instances:
 
-References
-[1] C. Bingham, C. Walsh, and S. Carroll, "Impact of driving characteristics on electric vehicle energy consumption," SAE Int. J. Alt. Power, vol. 1, no. 1, pp. 132-141, 2012.
-[2] Y. Bi, D. Chrenko, F. Gao, and D. Paire, "Estimating vehicle electric consumption using machine learning algorithms," in Proc. IEEE Transportation Electrification Conference and Expo (ITEC), 2020, pp. 450-455.
-[3] J. Schmalstieg, S. Kabitz, M. Ecker, and D. U. Sauer, "A holistic aging model for Li(NiMnCo)O2 based 18650 lithium-ion cells," Journal of Power Sources, vol. 257, pp. 325-334, 2014.
-[4] K. A. Severson et al., "Data-driven prediction of battery cycle life before capacity degradation," Nature Energy, vol. 4, no. 5, pp. 383-391, 2019.
-[5] T. Chen and C. Guestrin, "XGBoost: A scalable tree boosting system," in Proc. 22nd ACM SIGKDD Int. Conf. Knowl. Discov. Data Min., 2016, pp. 785-794.
-[6] T. Akiba, S. Sano, T. Yanase, T. Ohta, and M. Koyama, "Optuna: A next-generation hyperparameter optimization framework," in Proc. 25th ACM SIGKDD Int. Conf. Knowl. Discov. Data Min., 2019, pp. 2623-2631.
-[7] S. M. Lundberg and S.-I. Lee, "A unified approach to interpreting model predictions," in Proc. Advances in Neural Information Processing Systems (NeurIPS), 2017, pp. 4765-4774.
-[8] S. Onori, L. Serrao, and G. Rizzoni, Hybrid Electric Vehicles: Energy Management Strategies. London: Springer-Verlag, 2016.
+*Figure 3. SHAP feature importance ranking: Usable capacity, SOC, speed, and ambient temperature dominance.*
+
+**SHAP Interpretability Insights:** Battery Usable Capacity, State of Charge (SOC), Vehicle Speed, and Ambient Temperature account for over 78% of the total predictive power. Ambient temperature exhibits pronounced non-linear effects: cold temperatures (-10°C) reduce predicted range by up to 28% due to elevated internal cell resistance and cabin heating loads, while moderate temperatures (20–25°C) maximize efficiency.
+
+---
+
+### 6. Deployment and System Architecture
+The complete predictive pipeline is packaged for practical hard-copy demonstration and real-world deployment:
+1. **FastAPI REST Service:** Production-ready backend with Pydantic schema validation enforcing physical input bounds (temperature between -20°C and 50°C; SOC between 0% and 100%). Provides modular endpoints for real-time range estimation, SOH calculation, and safe charging advice with automatic documentation.
+2. **Containerization:** Packaged using a reproducible Dockerfile containing the lightweight Python runtime, dependencies, and serialized model weights for cross-platform portability.
+3. **Interactive Dashboard:** An intuitive web interface allows operators and drivers to dynamically simulate trip variables, temperature shifts, and payload changes, observing instantaneous range predictions and battery health indicators.
+
+---
+
+### 7. Conclusion and Future Scope
+VoltWise demonstrates that integrating a physical battery degradation digital twin with machine learning regression significantly improves EV driving range prediction accuracy. The Optuna-tuned XGBoost model achieved an MAE of 9.685 km and an $R^2$ score of 0.9589, representing a 56.3% error reduction over baseline linear methods with an inference latency of just 2 ms.
+
+**Future Scope:** Future extensions include deploying Long Short-Term Memory (LSTM) recurrent networks for continuous cell voltage tracking, and integrating road elevation gradients from digital mapping services for dynamic elevation-aware energy optimization.
+
+---
+
+### References
+[1] C. Bingham, C. Walsh, and S. Carroll, "Impact of driving characteristics on electric vehicle energy consumption," *SAE Int. J. Alt. Power*, vol. 1, no. 1, pp. 132–141, 2012.  
+[2] Y. Bi, D. Chrenko, F. Gao, and D. Paire, "Estimating vehicle electric consumption using machine learning algorithms," in *Proc. IEEE Transportation Electrification Conf. and Expo (ITEC)*, 2020, pp. 450–455.  
+[3] J. Schmalstieg, S. Kabitz, M. Ecker, and D. U. Sauer, "A holistic aging model for Li(NiMnCo)O2 based 18650 lithium-ion cells," *Journal of Power Sources*, vol. 257, pp. 325–334, 2014.  
+[4] T. Chen and C. Guestrin, "XGBoost: A scalable tree boosting system," in *Proc. 22nd ACM SIGKDD Int. Conf. Knowl. Discov. Data Min.*, 2016, pp. 785–794.  
+[5] T. Akiba, S. Sano, T. Yanase, T. Ohta, and M. Koyama, "Optuna: A next-generation hyperparameter optimization framework," in *Proc. 25th ACM SIGKDD Int. Conf. Knowl. Discov. Data Min.*, 2019, pp. 2623–2631.  
+[6] S. M. Lundberg and S.-I. Lee, "A unified approach to interpreting model predictions," in *Proc. Advances in Neural Information Processing Systems (NeurIPS)*, 2017, pp. 4765–4774.

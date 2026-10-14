@@ -73,3 +73,7 @@ logs/
 
 # Cache
 .cache/
+
+# Office lock files
+~$*.docx
+*.tmp
